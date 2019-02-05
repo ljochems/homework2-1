@@ -1,0 +1,269 @@
+---
+title: "HW2(Jochems)"
+author: "Louis Jochems"
+output: word_document
+---
+
+``` {r Question 1}
+# Question 1 
+seedling<-read.csv("SEEDLING_SURVIVAL.csv")
+head(seedling)
+
+
+#A) Height on Seedling Survival
+```
+```{r Height plot, echo=FALSE}
+#a) 
+plot(seedling$survival~seedling$HEIGHT)
+x<-seedling$HEIGHT
+curve(plogis(-0.06271111+0.14071141*x),add=T,col="red")
+```
+
+```{r question 1 part A}
+m1<-glm(seedling$survival~seedling$HEIGHT,family="binomial")
+summary(m1)
+coef(m1)
+#a 
+plogis(-0.06271111)
+#b
+0.14071141/4
+#CI
+#plogis for intercept, real numbers for slope
+plogis(confint(m1))
+confint(m1)
+
+
+
+#b) At maximum effect size, for every unit increase in height there 
+#is a 0.133 increase in chance of survival for seedling survival. 
+#The coefficient is 0.48, meaning that there is a 48% chance of survival when canopy height is zero.
+
+#c) The confidence interval for the intercept lies between 35 to 60%, 
+#indicating that there isuncertainty in the model for baseline survival of seedlings. 
+#The CI interval for the slope is tighter, between 2 to 4.5%, indicating 
+#that maximum effect of canopy height on seedling survival is significant (does not cross zero) and lies between 2 to 4.5% increase in survival. 
+```
+
+``` {r Question 1 Part B}
+#B) Light on Seedling Survival
+```
+
+``` {r Light plot, echo=FALSE}
+#)a
+plot(seedling$survival~seedling$LIGHT)
+x<-seedling$light
+curve(plogis(2.66194692 + -0.06552684*x),add=T,col="red")
+```
+
+```{r Question 1 Part B continued}
+m2<-glm(seedling$survival~seedling$LIGHT,family="binomial")
+summary(m2)
+coef(m2)
+#a
+plogis(2.66194692)
+#b
+-0.06552684/4
+#CI
+#plogis for intercept, real numbers/4 for slope
+plogis(confint(m2))
+confint(m2)
+
+
+
+#b) At maxmimum effect size, we observe a positive slope of 0.12, or a 12% 
+#increase in seedling survival for every 1 unit increase of light. For intercept,
+# there is a 93% percent chance of seedling survival at a baseline light of zero. 
+
+
+#c) The CI for intercept lies between 90 to 95.6%, giving us high certainty for baseline seedling survival estimate. 
+# The CI for slope ranges from -3 and -9%, indicating that light is a significant predictor of seedling survival. 
+
+##Answer
+# Based on the CI, we see that height is a stronger predictor of seedling survival than the CI of light. However, the tighter CI (narrower range) for the intercept/slope for light gives us more certainty that the glm parameters are more likely to be correct. Additionally the 
+#model paramaters for height fit the data for seedling survival than the model parameters for light. 
+```
+
+```{r Question 2}
+###question 2###
+seeds<-read.csv("Seeds.csv")
+```
+
+```{r question 2 first plot}
+plot(seeds$recruits~seeds$DBH)
+#but need to plot data as proportion of seeds suriving out of seeds added
+Survivors<-seeds$recruits/seeds$seeds
+```
+
+```{r question 2 continued}
+#setting up a binomial glm: 
+#a) DBH
+seed_success<-cbind(seeds$recruits,seeds$seeds-seeds$recruits)
+head(seed_success)
+m1<-glm(seed_success~seeds$DBH,family="binomial")
+summary(m1)
+coef(m1)
+#a
+plogis(-1.82983245)
+#b
+-0.02625002/4 
+
+#CI
+#plogis for intercept, real numbers for slope
+plogis(confint(m1))
+confint(m1)
+```
+
+```{r question 2 second plot}
+#a)
+plot(Survivors~seeds$DBH)
+x<-seeds$DBH
+curve(plogis(-1.82983245+-0.02625002*x),add=T, col="red")
+```
+```{r question 2bc}
+#b)The intercept estimate for this model is 0.138, or close to a 14% chance of survival for recruits (out of number of seeds added) when DBH of conspecific adults is zero. The estimate for slope is -0.006, indicating that the max effect of conspecific DBH is small but significant, with a decrease of 0.65 % in seed recruitment for every unit increase in conspecific DBH. 
+
+#c) The CI for intercept is between 12 and 14% giving us certainty that the estmited baseline survival value is correct. For DBH, the CI is between -0.03 and -0.021, indicating certainty for a small, but significant effect. 
+
+# ANSWER: 
+# My results do support that my selected predictor variable, conspecifc DBH in plots, has a significant effect on seedling germination given a strong p value, narrow CI intervals for intercept (certainty  of parameters) and CI for slope that do not cross zero. 
+```
+
+```{r question 3}
+# Question 3 
+mosquito<- read.csv("mosquito_data.csv")
+head(mosquito)
+emerge_adults <- mosquito$Emergent_adults/mosquito$Egg_Count
+
+adult_success<-cbind(mosquito$Emergent_adults,mosquito$Egg_Count-mosquito$Emergent_adults)
+
+m3<-glm(adult_success~mosquito$Detritus,family="binomial")
+coef(m3)
+plogis(1.3240425)
+```
+```{r question 3 plot, echo=FALSE}
+#a/b)
+plot(emerge_adults~mosquito$Detritus)
+x<-mosquito$Detritus
+e<-exp(1)
+curve(plogis(1.44-0.19*x-0.21*x^2+0.04*x^3), add=T,col="red")
+curve(plogis(10*x*e^(-2*x)), add=T,col="green")
+```
+
+```{r question 3 continued}
+#c) We see that the polynomial model shows much more variation between emerged adults and org. detritus. The porpotion of emergent adults steadily decreases as amount of org. detritus in pools increases, up until around 4.15 [unit] detritus, where it starts to steadily increase again. This might indicate that detritus may not be a significant predictor of emergent adult success and/or varies under the polynomial model. The Ricker model shows that survival of emergent adults increases steeply from 0 to 1 units of detritus but then steadily decreases and has no effect (levels off around 3 units), perhaps after detritus surpasses some threshold of sufficient abundance.  
+
+
+#d) trying to minimize negative log likelihood
+
+-sum(dbinom(mosquito$Emergent_adults,mosquito$Egg_Count,              
+plogis(10*mosquito$Detritus*e^(-2*mosquito$Detritus)),log=T))
+
+-sum(dbinom(mosquito$Emergent_adults,mosquito$Egg_Count,              
+ prob=plogis(1.44-0.19*x-0.21*x^2+0.04*x^3),log=T))
+
+# ANSWER: The likelihood is higher for the ricker model (1385.85, or minimized negative log likelihood) than for the polynomial model (1415.63). Thus we are more likely to observe the data given the hypothesis under the ricker model. 
+```
+
+```{r question 4}
+#question 4 
+#stochastic simulation for linear regression 
+slope<- -0.1
+intercept<- 350
+
+sample_size=rep(seq(from=400,to=43), times=10)
+estimated_slope<-rep(NA,length(sample_size))
+power_vector<- rep(NA,3580)
+for(j in 1:length(sample_size)) {
+  power_vector=rnorm(sample_size[j],intercept+slope*seq(from=500,to=1500,length=sample_size[j]),25)
+  m1<-glm(power_vector~seq(from=500,to=1500,length=sample_size[j]))
+  estimated_slope[j]=coef(m1)[2]}
+summary(m1)$coefficients[2,4]
+#reps
+358*10
+coef(m1)
+confint(m1)
+```
+
+```{r question 4 plot for linear regression}
+plot(estimated_slope~sample_size)
+abline(h=-0.1,col="red",lwd=2)
+
+```
+
+```{r question 4 continued}
+#binomial regression simulation
+slope<- -0.001
+intercept<- -0.04
+
+sample_size<- c(3:1000)
+estimated_slope<-rep(NA,times=length(sample_size))
+power_vector<-rep(NA,times=997)
+for(j in 1:length(sample_size)){
+  power_vector=rbinom(sample_size[j],plogis(intercept+slope*seq(from=1, to=5000,length=sample_size[j])),size=1)
+  m1<-glm(power_vector~seq(from=1, to=5000,length=sample_size[j]),family="binomial")
+  estimated_slope[j]=coef(m1)[2]}
+
+```
+
+```{r question 4 plot of binomial regression}
+plot(estimated_slope~sample_size)
+abline(h=0,col="red",lwd=2)
+```
+
+```{r question 4a}
+#a) MSE values closer to zero are better
+# for linear regression: 
+
+#LR_MSE
+mean(-0.1-(estimated_slope))^2
+#[1] 2.495188e-08
+
+#BR_MSE
+mean(-0.5-(estimated_slope))^2
+#[1] 0.25
+
+#In my linear regression simulation, it looks like I need around 215 samples to ensure accurate estimate parameters. For my binomial regression,  it looks like I need between 75 and 100 samples to ensure accurate slope and intercept. 
+
+#b) 
+#linear regression: 
+slope<- -0.1
+intercept<- 350
+sample_size=rep(seq(from=400,to=43), times=10)
+estimated_slope<-rep(NA,length(sample_size))
+power_vector<- rep(NA,3580)
+for(j in 1:length(sample_size)) {
+  power_vector=rnorm(sample_size[j],intercept+slope*seq(from=500,to=1500,length=sample_size[j]),25)
+  m1<-glm(power_vector~seq(from=500,to=1500,length=sample_size[j]))
+  estimated_slope[j]=summary(m1)$coefficients[2,4]}
+```
+
+```{r problem 4 p value plot lr, echo=FALSE}
+plot(estimated_slope~sample_size, ylab="P Value")
+#It looks like I need around 60 samples to ensure a p value<0.05.
+```
+
+```{r problem 4b}
+#binomial regression: 
+slope<- -0.001
+intercept<- -0.04
+sample_size<- c(3:1000)
+estimated_slope<-rep(NA,times=length(sample_size))
+power_vector<-rep(NA,times=length(sample_size))
+for(j in 1:length(sample_size)){
+  power_vector=rbinom(sample_size[j],plogis(intercept+slope*seq(from=1, to=5000,length=sample_size[j])),size=1)
+  m1<-glm(power_vector~seq(from=1, to=5000,length=sample_size[j]),family="binomial")
+  estimated_slope[j]=summary(m1)$coefficients[2,4]}
+
+```
+
+```{r problem p value plot br, echo=FALSE}
+plot(estimated_slope~sample_size, ylab="P Value")
+#It looks like I need around 175 samples to ensure that my p value is less than 0.05. 
+
+```
+
+```{r problem 4c}
+#My extracted p values are both very small and significant for both binomial and linear regression simulations. However, there are big differences between the estimated vs. actual parameters for binomial model, but much closer model parameters to the actual slope and intercept for the linear regression.  
+
+#c) Continuous variables have more information (range of values) to fit within models, generating more statistical power. Discrete response variables have categories that may not fit perfectly within models. 
+```
